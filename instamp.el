@@ -93,21 +93,21 @@ See the documentation of instamp-date-format-list.")
   (if (string< "19" emacs-version)
       (format-time-string format (current-time))
     (let ((tmpbuf (get-buffer-create " *instamp tmp*"))
-      (cb (current-buffer))
-      (-c (cond
-           ((boundp 'shell-command-option) shell-command-option)
-           ((boundp 'shell-command-switch) shell-command-switch)
-           (t "-c"))))
+          (cb (current-buffer))
+          (-c (cond
+               ((boundp 'shell-command-option) shell-command-option)
+               ((boundp 'shell-command-switch) shell-command-switch)
+               (t "-c"))))
       (unwind-protect
-      (with-current-buffer tmpbuf
-        (erase-buffer)
-        (call-process shell-file-name
-              nil t nil
-              -c
-              (format "%s \"+%s\"" instamp-date-command format))
-        (buffer-string))
-    (set-buffer cb)
-    (kill-buffer tmpbuf)))))
+          (with-current-buffer tmpbuf
+            (erase-buffer)
+            (call-process shell-file-name
+                          nil t nil
+                          -c
+                          (format "%s \"+%s\"" instamp-date-command format))
+            (buffer-string))
+        (set-buffer cb)
+        (kill-buffer tmpbuf)))))
 
 (defun instamp-japanese-wday (str)
   "Translate %j to Japanese weekday name."
@@ -126,7 +126,7 @@ See the documentation of instamp-date-format-list.")
 
 (defun instamp-remove-zeroprefix (string)
   (let ((ptn "/\\<0\\([0-9]+\\)")
-    (new string) p)
+        (new string) p)
     (if (fboundp 'replace-regexp-in-string)
         (replace-regexp-in-string ptn "/\\1" string)
       (while (setq p (string-match ptn new))
@@ -139,46 +139,48 @@ See the documentation of instamp-date-format-list.")
 Define your favorite time format(list) in instamp-date-format-list."
   (interactive "P")
   (let*((len (length instamp-date-format-list))
-    (up (car (where-is-internal 'previous-line)))
-    (upkey (key-description up))
-    (dn (car (where-is-internal 'next-line)))
-    (dnkey (key-description dn))
-    (p (point)) (mf (buffer-modified-p)) date
-    (n (or n 0)) key r fmt
-    (msg (format "Continue=SPC up=[%s] down=[%s] quit=q z=zero"
-             upkey dnkey)))
+        (up (car (where-is-internal 'previous-line)))
+        (upkey (key-description up))
+        (dn (car (where-is-internal 'next-line)))
+        (dnkey (key-description dn))
+        (p (point)) (mf (buffer-modified-p)) date
+        (n (or n 0)) key r fmt
+        (msg (format "Continue=SPC up=[%s] down=[%s] quit=q z=zero"
+                     upkey dnkey)))
     (if (catch 'done
-      (while t
-        (setq n (% (+ len n) len)
-              fmt (nth n instamp-date-format-list))
-        (if (string-match "%j" fmt)
-            (setq fmt (instamp-japanese-wday fmt)))
-        (setq date (instamp-format-time-string fmt))
-        (if instamp-remove-preceding-zero
-            (setq date (instamp-remove-zeroprefix date)))
-        (delete-region (point) p)
-        (insert date)
-        (setq key (char-to-string (read-char msg)))
-        (cond
-         ((or (eq (key-binding key) 'previous-line)
-              (string-match "\C-e\\|C-p" key))
-          (setq n (1- n))
-          (delete-region (point) p))
-         ((or (eq (key-binding key) 'next-line)
-              (string-match "\C-x\\|C-n" key))
-          (setq n (1+ n)))
-         ((equal key " ")
-          (throw 'done t))
-         ((equal key "q")
-          (delete-region (point) p)
-          (set-buffer-modified-p mf)
-          (throw 'done nil))
-         ((equal key "z")
-          (setq instamp-remove-preceding-zero
-                (not instamp-remove-preceding-zero)))
-         (t (setq unread-command-events (aref key 0))
-            (throw 'done t)))))
-    ;; date string is inserted, put selected result at the head.
-    (setq instamp-date-format-list
-          (cons fmt (delq fmt instamp-date-format-list))))
+          (while t
+            (setq n (% (+ len n) len)
+                  fmt (nth n instamp-date-format-list))
+            (if (string-match "%j" fmt)
+                (setq fmt (instamp-japanese-wday fmt)))
+            (setq date (instamp-format-time-string fmt))
+            (if instamp-remove-preceding-zero
+                (setq date (instamp-remove-zeroprefix date)))
+            (delete-region (point) p)
+            (insert date)
+            (setq key (char-to-string (read-char msg)))
+            (cond
+             ((or (eq (key-binding key) 'previous-line)
+                  (string-match "\C-e\\|C-p" key))
+              (setq n (1- n))
+              (delete-region (point) p))
+             ((or (eq (key-binding key) 'next-line)
+                  (string-match "\C-x\\|C-n" key))
+              (setq n (1+ n)))
+             ((equal key " ")
+              (throw 'done t))
+             ((equal key "q")
+              (delete-region (point) p)
+              (set-buffer-modified-p mf)
+              (throw 'done nil))
+             ((equal key "z")
+              (setq instamp-remove-preceding-zero
+                    (not instamp-remove-preceding-zero)))
+             (t (setq unread-command-events (aref key 0))
+                (throw 'done t)))))
+        ;; date string is inserted, put selected result at the head.
+        (setq instamp-date-format-list
+              (cons fmt (delq fmt instamp-date-format-list))))
     (message "")))
+
+
