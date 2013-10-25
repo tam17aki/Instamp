@@ -183,4 +183,4 @@ Define your favorite time format(list) in instamp-date-format-list."
               (cons fmt (delq fmt instamp-date-format-list))))
     (message "")))
 
-
+(provide 'instamp)
